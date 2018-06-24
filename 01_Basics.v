@@ -10,27 +10,65 @@ Inductive unit : Set :=
 Check unit.
 Check item.
 
-Inductive bool : Set :=
-| true : bool
-| false : bool
+Inductive color : Set :=
+| black : color
+| white : color
 .
 
+Check color.
+Check black.
+Check white.
+
+Inductive bool : Set :=
+| true 
+| false
+.
 Check bool.
 Check true.
 Check false.
 
+Check Set.
+Check Type.
+
 (** На множестве с двумя элементами мы можем определить функции *)
 
-Definition negb (b:bool) : bool :=
+Definition negb (b : bool) : bool :=
 match b with
 | true => false
 | false => true
 end.
 
-Definition andb (b1:bool) (b2:bool) : bool :=
+Definition andb (b1 : bool) (b2 : bool) : bool :=
 match b1 with
 | true => b2
 | false => false
+end.
+
+Definition andb' := 
+fun (b1 b2 : bool) =>
+(match b1 with
+| true => b2
+| false => false
+end) : bool.
+
+Check andb'.
+
+Check andb.
+Print andb.
+
+Definition andb2 (b1 : bool) (b2 : bool) : bool :=
+match b1 with
+| true => match b2 with
+          | true => true
+          | flse => false
+          end
+| false => false
+end.
+
+Definition andb3 (b1 : bool) (b2 : bool) : bool :=
+match b1, b2 with
+| true, true => true
+| _, _ => false
 end.
 
 Definition orb (b1:bool) (b2:bool) : bool :=
@@ -100,62 +138,107 @@ Notation "x || y" := (orb x y).
 
 Compute (false || false || true).   (* = true *)
 
-(*
 (* Упражнение: 1 *)
 
 Definition nandb (b1 : bool) (b2 : bool) : bool :=
   (* написать определение *)
+match b1, b2 with
+| true, true => false
+| _, _ => true
+end.
 
 Example test_nandb1 :
   (nandb true false) = true.
 (* написать доказательство *)
+Proof.
+  simpl.
+  reflexivity.
+Qed. 
 
 Example test_nandb2 :
   (nandb false false) = true.
 (* написать доказательство *)
+Proof.
+  simpl.
+  reflexivity.
+Qed.
 
 Example test_nandb3 :
   (nandb false true) = true.
 (* написать доказательство *) 
+Proof.
+  simpl.
+  reflexivity.
+Qed.
 
 Example test_nandb4 :
   (nandb true true) = false.
 (* написать доказательство *) 
+Proof.
+  simpl.
+  reflexivity.
+Qed.
+
+Lemma and_eq_and2 :
+  forall b1 b2 : bool,
+  andb b1 b2 = andb2 b1 b2.
+Proof.
+  intros.
+  case b1, b2; reflexivity.
+Qed.
+
 
 (* Упражнение: 2 *)
 
-Definition andb3 (b1 : bool) (b2 : bool) (b3 : bool) : bool :=
-  (* 
-  написать определение функции, 
-  которая вычисляет произведение трех булевых переменных
-  *)
+Definition andb4 (b1 : bool) (b2 : bool) (b3 : bool) : bool :=
+match b1, b2, b3 with
+| true, true, true => true
+| _, _, _ => false
+end.
+Definition andb4' (b1 b2 b3 : bool) : bool := b1 && (b2 && b3).
+
+Definition ifte (b1 b2 b3 : bool) : bool := if b1 then b2 else b3.
+
+Definition implb (b1 b2 : bool) : bool := 
+match b1 with
+| true => b2
+| false => true
+end.
+
+Compute ifte false true true.
+
+Lemma andb4_eq_andb4':
+  forall b1 b2 b3 : bool,
+  andb4 b1 b2 b3 = andb4' b1 b2 b3.
+Proof.
+  intros.
+  case b1, b2, b3; reflexivity.
+Qed.
 
 Example test_andb31 :
-  (andb3 true true true) = true.
-(* написать доказательство *) 
+  (andb4 true true true) = true.
+Proof. reflexivity. Qed.
 
 Example test_andb32 :
-  (andb3 false true true) = false.
-(* написать доказательство *) 
+  (andb4 false true true) = false.
+Proof. reflexivity. Qed.
 
 Example test_andb33 :
-  (andb3 true false true) = false.
-(* написать доказательство *) 
+  (andb4 true false true) = false.
+Proof. reflexivity. Qed.
 
 Example test_andb34 :
-  (andb3 true true false) = false.
-(* написать доказательство *) 
-
-*)
+  (andb4 true true false) = false.
+Proof. reflexivity. Qed.
 
 Inductive day : Set :=
-| monday : day
-| tuesday : day
-| wednesday : day
-| thursday : day
-| friday : day
-| saturday : day
-| sunday : day
+| monday
+| tuesday
+| wednesday
+| thursday
+| friday
+| saturday
+| sunday
 .
 
 Definition next_weekday (d : day) : day :=
@@ -169,26 +252,32 @@ match d with
 | sunday    => monday
 end.
 
-Compute (next_weekday friday).
+Compute (next_weekday monday).
 
 Example test_next_weekday:
   (next_weekday (next_weekday saturday)) = tuesday.
 Proof. simpl. reflexivity.  Qed.
 
+Inductive Gender : Set :=
+| boy : Gender
+| girl : Gender
+.
 
-Inductive rgb : Type :=
-  | red : rgb
-  | green : rgb
-  | blue : rgb.
+Inductive Student : Set :=
+| ivanov : Student
+| petrov : Student
+| sidorova : Student
+| kazakova : Student
+| vladimirov : Student
+.
 
-Inductive color : Type :=
-  | black : color
-  | white : color
-  | primary : rgb -> color.
+Definition StudentGender (s : Student) : Gender := 
+match s with
+| ivanov => boy
+| petrov => boy
+| sidorova => girl
+| kazakova => girl
+| vladimirov => boy
+end.
 
-Definition monochrome (c : color) : bool :=
-  match c with
-  | black => true
-  | white => true
-  | primary p => false
-  end.
+Compute (StudentGender sidorova).
