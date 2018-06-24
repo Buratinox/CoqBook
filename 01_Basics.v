@@ -2,11 +2,13 @@
 
 Inductive empty : Set :=
 .
+
 Check empty.
 
 Inductive unit : Set :=
 | item : unit
 .
+
 Check unit.
 Check item.
 
@@ -23,6 +25,7 @@ Inductive bool : Set :=
 | true 
 | false
 .
+
 Check bool.
 Check true.
 Check false.
@@ -76,6 +79,7 @@ match b1 with
 | true => true
 | false => b2
 end.
+
 Check negb.
 Check andb.
 Check orb.
@@ -156,7 +160,7 @@ Proof.
 Qed. 
 
 Example test_nandb2 :
-  (nandb false false) = true.
+  nandb false false = true.
 (* написать доказательство *)
 Proof.
   simpl.
@@ -164,7 +168,7 @@ Proof.
 Qed.
 
 Example test_nandb3 :
-  (nandb false true) = true.
+  nandb false true = true.
 (* написать доказательство *) 
 Proof.
   simpl.
@@ -172,7 +176,7 @@ Proof.
 Qed.
 
 Example test_nandb4 :
-  (nandb true true) = false.
+  nandb true true = false.
 (* написать доказательство *) 
 Proof.
   simpl.
@@ -216,20 +220,28 @@ Proof.
 Qed.
 
 Example test_andb31 :
-  (andb4 true true true) = true.
-Proof. reflexivity. Qed.
+  andb4 true true true = true.
+Proof.
+  reflexivity. 
+Qed.
 
 Example test_andb32 :
-  (andb4 false true true) = false.
-Proof. reflexivity. Qed.
+  andb4 false true true = false.
+Proof.
+  reflexivity. 
+Qed.
 
 Example test_andb33 :
-  (andb4 true false true) = false.
-Proof. reflexivity. Qed.
+  andb4 true false true = false.
+Proof.
+  reflexivity.
+Qed.
 
 Example test_andb34 :
-  (andb4 true true false) = false.
-Proof. reflexivity. Qed.
+  andb4 true true false = false.
+Proof.
+  reflexivity.
+Qed.
 
 Inductive day : Set :=
 | monday
@@ -256,7 +268,10 @@ Compute (next_weekday monday).
 
 Example test_next_weekday:
   (next_weekday (next_weekday saturday)) = tuesday.
-Proof. simpl. reflexivity.  Qed.
+Proof.
+  simpl.
+  reflexivity.
+Qed.
 
 Inductive Gender : Set :=
 | boy : Gender
