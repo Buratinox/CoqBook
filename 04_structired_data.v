@@ -1,8 +1,6 @@
-(** *  Structured Data *)
+(** *  Структурные данные *)
 
-Module NatList.
-
-(** * Pairs of Numbers *)
+(** Пары булевых переменных *)
 
 Inductive boolprod : Type :=
 | pairb : bool -> bool -> boolprod.
@@ -17,10 +15,10 @@ Definition sndb (p : boolprod) : bool :=
   | pairb x y => y
   end.
 
+(** * Пары натуральных чисел *)
+
 Inductive natprod : Type :=
 | pair : nat -> nat -> natprod.
-
-Check (pair 3 5).
 
 Definition fst (p : natprod) : nat :=
   match p with
@@ -56,7 +54,8 @@ Definition swap_pair (p : natprod) : natprod :=
 Theorem surjective_pairing' : forall (n m : nat),
   (n,m) = (fst (n,m), snd (n,m)).
 Proof.
-  reflexivity.  Qed.
+  reflexivity.
+Qed.
 
 Theorem surjective_pairing_stuck : forall (p : natprod),
   p = (fst p, snd p).
@@ -67,7 +66,11 @@ Abort.
 Theorem surjective_pairing : forall (p : natprod),
   p = (fst p, snd p).
 Proof.
-  intros p.  destruct p as [n m].  simpl.  reflexivity.  Qed.
+  intros p.
+  destruct p as [n m].
+  simpl.
+  reflexivity.
+Qed.
 
 Theorem snd_fst_is_swap : forall (p : natprod),
   (snd p, fst p) = swap_pair p.
