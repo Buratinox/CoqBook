@@ -285,3 +285,12 @@ Lemma app_inv_tail:
   forall l l1 l2 : list A, 
   l1 ++ l = l2 ++ l -> l1 = l2.
 Proof. Admitted.
+
+Fixpoint take (n:nat)(l:list A) : list A :=
+.
+Fixpoint skip (n:nat)(l:list A) : list A :=
+.
+
+Lemma firstn_skipn : 
+  forall n l, 
+  take n l ++ skip n l = l.
