@@ -266,3 +266,22 @@ Example test_split:
   split [(1,false);(2,false)] = ([1;2],[false;false]).
 Proof. Admitted.
 
+Theorem app_eq_nil : 
+  forall l l':list A, 
+  l ++ l' = [] -> l = [] /\ l' = [].
+Proof. Admitted.
+
+Theorem app_comm_cons : 
+  forall (x y:list A) (a:A), 
+  a :: (x ++ y) = (a :: x) ++ y.
+Proof. Admitted.
+
+Lemma app_inv_head:
+  forall l l1 l2 : list A, 
+  l ++ l1 = l ++ l2 -> l1 = l2.
+Proof. Admitted.
+
+Lemma app_inv_tail:
+  forall l l1 l2 : list A, 
+  l1 ++ l = l2 ++ l -> l1 = l2.
+Proof. Admitted.
