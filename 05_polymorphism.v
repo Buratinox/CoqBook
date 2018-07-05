@@ -72,17 +72,17 @@ Notation "X * Y" := (prod X Y).
 
 Definition fst {X Y : Type} (p : X * Y) : X :=
   match p with
-  | (x, y) => x
+  | (x, _) => x
   end.
 
 Definition snd {X Y : Type} (p : X * Y) : Y :=
   match p with
-  | (x, y) => y
+  | (_, y) => y
   end.
 
 Definition swap {X Y : Type} (p : X * Y) : Y * X :=
   match p with
-  | (x, y) => (y,x)
+  | (x, y) => (y, x)
   end.
 
 Compute (swap (true, 13)).
@@ -110,7 +110,7 @@ Inductive boollist : Type :=
   | natnil : natlist
   | natcons : nat -> natlist -> natlist.
 
-Inductive list (X:Type) : Type :=
+Inductive list (X : Type) : Type :=
   | nil : list X
   | cons : X -> list X -> list X.
 
@@ -137,6 +137,8 @@ Fixpoint repeat (X : Type) (x : X) (count : nat) : list X :=
   | S count' => cons X x (repeat X x count')
   end.
 
+Compute (repeat nat 4 2).
+
 Example test_repeat1 :
   repeat nat 4 2 = cons nat 4 (cons nat 4 (nil nat)).
 Proof. reflexivity.  Qed.
@@ -144,11 +146,13 @@ Proof. reflexivity.  Qed.
 (** To use [repeat] to build other kinds of lists, we simply
     instantiate it with an appropriate type parameter: *)
 
+Compute (repeat bool false 4).
+
 Example test_repeat2 :
   repeat bool false 1 = cons bool false (nil bool).
 Proof. reflexivity.  Qed.
 
-  Fixpoint repeat'' X x count : list X :=
+Fixpoint repeat'' X x count : list X :=
   match count with
   | 0        => nil _
   | S count' => cons _ x (repeat'' X x count')
@@ -180,7 +184,7 @@ Inductive list' {X : Type} : Type :=
   | nil' : list'
   | cons' : X -> list' -> list'.
 
-Fixpoint app' {X : Type} (l1 l2 : @list' X) : list' :=
+  Fixpoint app' {X : Type} (l1 l2 : @list' X) : list' :=
   match l1 with
   | nil'      => l2
   | cons' h t => cons' h (app' t l2)
@@ -192,22 +196,42 @@ Fixpoint app {X : Type} (l1 l2 : list X) : (list X) :=
   | cons h t => cons h (app t l2)
   end.
 
-Fixpoint rev {X:Type} (l:list X) : list X.
-Admitted.
+  Notation "x ++ y" := (app x y)
+                     (right associativity, at level 60).
+                     Notation "[ ]" := nil.
 
-Fixpoint length {X : Type} (l : list X) : nat.
-Admitted.
+                     Notation "n :: l" := (cons  n l)
+                                          (at level 60, right associativity).
+                     Notation "[ x ; .. ; y ]" := (cons x .. (cons y nil) ..).
+                     
+Fixpoint rev {X : Type} (l : list X) : list X :=
+match l with 
+| nil => nil
+| h :: t => (rev t) ++ [h]
+end.
+
+Fixpoint length {X : Type} (l : list X) : nat :=
+match l with
+| [] => O
+| n :: l' => S (length l')
+end.
 
 Example test_rev1 :
   rev (cons 1 (cons 2 nil)) = (cons 2 (cons 1 nil)).
-Proof. Admitted.
+Proof. 
+  reflexivity.
+Qed.
 
 Example test_rev2:
   rev (cons true nil) = cons true nil.
-Proof. Admitted.
+Proof. 
+  reflexivity.
+Qed.
 
 Example test_length1: length (cons 1 (cons 2 (cons 3 nil))) = 3.
-Proof. Admitted.
+Proof. 
+  reflexivity.
+Qed.
 
 Notation "x :: y" := (cons x y)
  (at level 60, right associativity).
@@ -223,26 +247,47 @@ Definition list123_ := [1; 2; 3].
 Theorem app_nill_r :
   forall (X : Type) (l : list X),
   l ++ [] = l.
-Proof. Admitted. 
+Proof. 
+  intros*.
+  induction l; simpl. reflexivity.
+  rewrite IHl. reflexivity.
+Qed. 
 
 Theorem app_assoc : 
   forall X (l m n : list X),
   l ++ m ++ n = (l ++ m) ++ n.
-Proof. Admitted.
+Proof. 
+  intros*.
+  induction l; simpl. reflexivity.
+  rewrite IHl. reflexivity.
+Qed.
 
 Lemma app_length :
   forall (X : Type)(l1 l2 : list X),
   length (l1 ++ l2) = (length l1) + (length l2).
-Proof. Admitted.
+Proof.
+  intros*.
+  induction l1; simpl. reflexivity.
+  rewrite IHl1. reflexivity.
+Qed.
 
 
 Theorem rev_app_distr: forall X (l1 l2 : list X),
   rev (l1 ++ l2) = rev l2 ++ rev l1.
-Proof. Admitted.
+Proof. 
+  intros*.
+  induction l1; simpl.
+  -rewrite app_nill_r. reflexivity.
+  -rewrite IHl1. rewrite app_assoc. reflexivity.
+Qed.
 
 Theorem rev_involutive : forall X : Type, forall l : list X,
   rev (rev l) = l.
-Proof. Admitted.
+Proof. 
+  intros*.
+  induction l; simpl. reflexivity.
+  rewrite rev_app_distr. rewrite IHl. reflexivity.
+Qed.
 
 Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
            : list (X * Y) :=
@@ -252,45 +297,72 @@ Fixpoint combine {X Y : Type} (lx : list X) (ly : list Y)
   | x :: tx, y :: ty => (x, y) :: (combine tx ty)
   end.
 
-(* какой тип у этой функции? чему равно значение
-Compute (combine [1;2] [false;false;true;true]).
+Check @combine.
+(*  ==> forall X Y : Type, list X -> list Y -> list (X * Y)
 *)
+(* какой тип у этой функции? чему равно значение *)
+Compute (combine [1;2] [false;false;true;true]).
+(* ==> [(1, false); (2, false)] *)
 
 (* обратная фнукция к [combine] *)
 
-Fixpoint split {X Y : Type} (l : list (X*Y))
-               : (list X) * (list Y)
-  (* написать фнкцию *). Admitted.
+Fixpoint split {X Y : Type} (l : list (X * Y)) : (list X) * (list Y) :=
+match l with
+| [] => ([], [])
+| (f, s) :: t => ((f :: fst (split t)), (s :: snd (split t)))
+end.
 
 Example test_split:
   split [(1,false);(2,false)] = ([1;2],[false;false]).
-Proof. Admitted.
+Proof. 
+  reflexivity.
+Qed.
 
 Theorem app_eq_nil : 
-  forall l l':list A, 
+  forall (A : Type) (l l' : list A), 
   l ++ l' = [] -> l = [] /\ l' = [].
-Proof. Admitted.
+Proof. 
+  destruct l as [| x l]; destruct l' as [| y l']; simpl; auto.
+  intro; discriminate.
+  intros H. discriminate H.
+Qed.
 
 Theorem app_comm_cons : 
+forall A : Type,
   forall (x y:list A) (a:A), 
   a :: (x ++ y) = (a :: x) ++ y.
-Proof. Admitted.
+Proof. 
+  intros*.
+  induction x; simpl; reflexivity.
+Qed.
 
-Lemma app_inv_head:
-  forall l l1 l2 : list A, 
-  l ++ l1 = l ++ l2 -> l1 = l2.
-Proof. Admitted.
+Fixpoint take {A : Type} (n : nat) (l : list A) : list A :=
+match n with
+|O => nil
+|S n' => match l with
+      |nil => nil
+      |h :: t => h :: take n' t
+      end
+end.
+      
+Fixpoint skip {A : Type} (n : nat) (l : list A) : list A :=
+match n with
+|O => l
+|S n' => match l with
+      |nil => nil
+      |h :: t => skip n' t
+      end
+end.
 
-Lemma app_inv_tail:
-  forall l l1 l2 : list A, 
-  l1 ++ l = l2 ++ l -> l1 = l2.
-Proof. Admitted.
-
-Fixpoint take (n:nat)(l:list A) : list A :=
-.
-Fixpoint skip (n:nat)(l:list A) : list A :=
-.
+Compute (take 5 [1;2;3;4;5;6;7]).
+Compute (skip 5 [1;2;3;4;5;6;7]).
 
 Lemma firstn_skipn : 
-  forall n l, 
+  forall (A : Type) (n : nat) (l : list A), 
   take n l ++ skip n l = l.
+Proof.
+  intros*.
+  induction n. simpl. reflexivity.
+  rewrite <- IHn. 
+
+Qed.
